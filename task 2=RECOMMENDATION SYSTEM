@@ -1,0 +1,60 @@
+import pandas as pd
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Creating a small dataset
+data = {
+    'user_id': [1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5],
+    'movie_id': [1, 2, 3, 1, 4, 2, 3, 4, 5, 1, 2, 5, 3, 5],
+    'rating': [5, 4, 3, 4, 5, 2, 5, 4, 5, 5, 4, 3, 4, 5]
+}
+
+# Movie titles for better understanding
+movie_titles = {
+    1: 'Movie A',
+    2: 'Movie B',
+    3: 'Movie C',
+    4: 'Movie D',
+    5: 'Movie E'
+}
+
+df = pd.DataFrame(data)
+
+# Creating a pivot table
+pivot_table = df.pivot_table(index='user_id', columns='movie_id', values='rating')
+
+# Fill NaN with 0 for similarity calculation
+pivot_table_filled = pivot_table.fillna(0)
+
+# Calculate cosine similarity
+user_similarity = cosine_similarity(pivot_table_filled)
+user_similarity_df = pd.DataFrame(user_similarity, index=pivot_table.index, columns=pivot_table.index)
+
+def get_recommendations(user_id, num_recommendations=3):
+    similar_users = user_similarity_df[user_id].sort_values(ascending=False).index[1:]
+    user_ratings = pivot_table.loc[user_id]
+    unseen_movies = user_ratings[user_ratings.isna()].index
+    
+    recommendations = {}
+    for movie_id in unseen_movies:
+        total_similarity = 0
+        weighted_sum = 0
+        for similar_user in similar_users:
+            similarity = user_similarity_df.loc[user_id, similar_user]
+            similar_user_rating = pivot_table.loc[similar_user, movie_id]
+            if not np.isnan(similar_user_rating):
+                weighted_sum += similarity * similar_user_rating
+                total_similarity += similarity
+        
+        if total_similarity > 0:
+            recommendations[movie_id] = weighted_sum / total_similarity
+    
+    recommended_movies = sorted(recommendations.items(), key=lambda x: x[1], reverse=True)
+    return [movie_id for movie_id, score in recommended_movies[:num_recommendations]]
+
+# Example: Get recommendations for user with user_id=1
+user_id = 
+recommendations = get_recommendations(user_id)
+recommended_movie_titles = [movie_titles[movie_id] for movie_id in recommendations]
+
+print(f"Recommended movies for user {user_id}: {recommended_movie_titles}")
