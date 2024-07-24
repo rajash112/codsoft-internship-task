@@ -1,0 +1,37 @@
+def chatbaba_response(user_input):
+    user_input = user_input.lower()  
+
+    if "hello" in user_input or "hi" in user_input:
+        return "Hello! How can I help you today?"
+
+    elif "date" in user_input:
+        from datetime import date
+        return f"Today's date is {date.today()}."
+    
+    elif "how are you?" in user_input:
+            return "i am good , how are you?"
+
+    elif "weather" in user_input:
+            return "I'm not connected to the internet, but you can check the weather on a weather app or website."
+
+    elif "time" in user_input:
+        from datetime import datetime
+        return f"The current time is {datetime.now().strftime('%H:%M:%S')}."
+    elif "news" in user_input:
+        return "You can get the latest news from news websites like BBC, CNN, or any other trusted news source."
+
+    else:
+        return "I'm sorry, I don't understand that question. Can you please ask something else?"
+
+def chatbaba():
+    print("Welcome to the Chatbaba! Ask me anything about today's world.")
+    while True:
+        user_input = input("You: ")
+        if user_input.lower() in ["exit", "quit", "bye"]:
+            print("chatbaba: Goodbye! Have a great day.")
+            break
+        response = chatbaba_response(user_input)
+        print(f"Chatbaba: {response}")
+
+
+chatbaba()
